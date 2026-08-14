@@ -2,7 +2,6 @@ FROM php:8.3-apache
 
 WORKDIR /var/www/html
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg62-turbo-dev \
@@ -15,12 +14,13 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install gd pdo_mysql zip \
     && rm -rf /var/lib/apt/lists/*
 
-# Fix Apache MPM - force only prefork
-RUN rm -f /etc/apache2/mods-enabled/mpm_*.load \
+# Fix Apache MPM
+RUN a2dismod mpm_event mpm_worker mpm_prefork || true \
+    && rm -f /etc/apache2/mods-enabled/mpm_*.load \
     /etc/apache2/mods-enabled/mpm_*.conf \
     && a2enmod mpm_prefork \
-    && a2enmod rewrite
-
+    && a2enmod rewrite \
+    && apache2ctl -M | grep mpm
 # Set Laravel public directory
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
