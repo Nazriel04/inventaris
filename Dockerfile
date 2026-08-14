@@ -2,6 +2,7 @@ FROM php:8.3-apache
 
 WORKDIR /var/www/html
 
+# Install system dependencies
 RUN apt-get update && apt-get install -y \
     libpng-dev \
     libjpeg62-turbo-dev \
@@ -14,24 +15,20 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install gd pdo_mysql zip \
     && rm -rf /var/lib/apt/lists/*
 
-# Fix Apache MPM
-RUN a2dismod mpm_event mpm_worker mpm_prefork || true \
-    && rm -f /etc/apache2/mods-enabled/mpm_*.load \
-    /etc/apache2/mods-enabled/mpm_*.conf \
-    && a2enmod mpm_prefork \
-    && a2enmod rewrite \
-    && apache2ctl -M | grep mpm
+# Enable Apache rewrite
+RUN a2enmod rewrite
+
 # Set Laravel public directory
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
     /etc/apache2/sites-available/000-default.conf
 
-# Install Node.js 20
+# Install Node.js + npm
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
-    && node --version \
-    && npm --version
+    && npm --version \
+    && node --version
 
 # Copy project
 COPY . /var/www/html
@@ -48,11 +45,10 @@ RUN npm install
 # Build Laravel Mix assets
 RUN npm run production
 
-# Laravel permissions
-RUN chown -R www-data:www-data \
-    /var/www/html/storage \
+# Permission
+RUN chown -R www-data:www-data /var/www/html/storage \
     /var/www/html/bootstrap/cache
 
 EXPOSE 80
 
-CMD ["apache2-foreground"]
+CMD ["sh", "-c", "sed -i \"s/Listen 80/Listen ${PORT:-80}/\" /etc/apache2/ports.conf && sed -i \"s/:80>/:${PORT:-80}>/g\" /etc/apache2/sites-available/000-default.conf && apache2-foreground"]
