@@ -14,8 +14,10 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install gd pdo_mysql zip \
     && rm -rf /var/lib/apt/lists/*
 
-# Enable Apache rewrite
-RUN a2enmod rewrite
+# Apache: gunakan hanya MPM prefork
+RUN a2dismod mpm_event mpm_worker mpm_prefork || true \
+    && a2enmod mpm_prefork \
+    && a2enmod rewrite
 
 # Set Laravel public directory
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
