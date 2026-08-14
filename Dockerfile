@@ -15,9 +15,10 @@ RUN apt-get update && apt-get install -y \
     && docker-php-ext-install gd pdo_mysql zip \
     && rm -rf /var/lib/apt/lists/*
 
-# Configure Apache MPM
-RUN a2dismod mpm_event mpm_worker mpm_prefork || true \
-    && a2enmod mpm_prefork rewrite
+# Fix Apache MPM
+RUN a2dismod mpm_event mpm_worker || true \
+    && a2enmod mpm_prefork \
+    && a2enmod rewrite
 
 # Set Laravel public directory
 ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
@@ -25,11 +26,11 @@ ENV APACHE_DOCUMENT_ROOT=/var/www/html/public
 RUN sed -ri -e 's!/var/www/html!${APACHE_DOCUMENT_ROOT}!g' \
     /etc/apache2/sites-available/000-default.conf
 
-# Install Node.js + npm
+# Install Node.js 20
 RUN curl -fsSL https://deb.nodesource.com/setup_20.x | bash - \
     && apt-get install -y nodejs \
-    && npm --version \
-    && node --version
+    && node --version \
+    && npm --version
 
 # Copy project
 COPY . /var/www/html
@@ -46,8 +47,9 @@ RUN npm install
 # Build Laravel Mix assets
 RUN npm run production
 
-# Permission
-RUN chown -R www-data:www-data /var/www/html/storage \
+# Laravel permissions
+RUN chown -R www-data:www-data \
+    /var/www/html/storage \
     /var/www/html/bootstrap/cache
 
 EXPOSE 80
