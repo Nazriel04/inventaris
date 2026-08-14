@@ -1,0 +1,35 @@
+<?php
+
+namespace App\Http\Resources;
+
+use Illuminate\Http\Request;
+use Illuminate\Http\Resources\Json\JsonResource;
+
+class ShowCommodityResource extends JsonResource
+{
+    /**
+     * Transform the resource into an array.
+     *
+     * @return array<string, mixed>
+     */
+    public function toArray(Request $request): array
+    {
+        return [
+           
+            'commodity_location_id' => $this->commodity_location_id,
+            'commodity_location' => $this->commodity_location,
+            'item_code' => $this->item_code,
+            'name' => $this->name,
+           
+            'year_of_purchase' => $this->year_of_purchase,
+            'commodity_condition_id' => $this->commodity_condition_id,
+            'condition_name' => $this->getConditionName(),
+            'quantity' => $this->quantity,
+            'price' => $this->price,
+            'price_formatted' => $this->indonesian_currency($this->price),
+            'price_per_item' => $this->price_per_item,
+            'price_per_item_formatted' => $this->indonesian_currency($this->price_per_item),
+            'note' => $this->note,
+        ];
+    }
+}
