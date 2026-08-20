@@ -7,15 +7,21 @@ use Illuminate\Support\Facades\Schema;
 return new class extends Migration
 {
     public function up()
-    {
-        Schema::table('commodities', function (Blueprint $table) {
-            $table->dropColumn([
-                'register',
-                'brand',
-                'material',
-            ]);
-        });
-    }
+{
+    Schema::table('commodities', function (Blueprint $table) {
+        if (Schema::hasColumn('commodities', 'register')) {
+            $table->dropColumn('register');
+        }
+
+        if (Schema::hasColumn('commodities', 'brand')) {
+            $table->dropColumn('brand');
+        }
+
+        if (Schema::hasColumn('commodities', 'material')) {
+            $table->dropColumn('material');
+        }
+    });
+}
 
     public function down()
     {
