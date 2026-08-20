@@ -5,7 +5,6 @@ namespace App;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Support\Number;
 
 class Commodity extends Model
 {
@@ -44,7 +43,7 @@ public function commodityCondition()
      */
     public function indonesian_currency($value)
     {
-        return Number::format($value, 2);
+        return number_format($amount, 2, ',', '.');
     }
 
     /**
