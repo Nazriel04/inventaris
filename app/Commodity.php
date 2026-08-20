@@ -42,9 +42,9 @@ public function commodityCondition()
      * Format a currency value to Indonesian currency format.
      */
     public function indonesian_currency($value)
-    {
-        return number_format($amount, 2, ',', '.');
-    }
+{
+    return number_format($value, 2, ',', '.');
+}
 
     /**
      * Get the name of the condition based on the condition code.
